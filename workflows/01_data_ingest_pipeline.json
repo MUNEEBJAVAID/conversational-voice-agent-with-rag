@@ -1,0 +1,215 @@
+{
+  "name": "Data ingest",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8f625b30-eb3a-4d6d-a9d2-58733bb50200",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1rdtgU7Jq97YqVwtLU47daeVjP5hU1ZdCmUN9Uhgn5y8",
+          "mode": "list",
+          "cachedResultName": "Products",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rdtgU7Jq97YqVwtLU47daeVjP5hU1ZdCmUN9Uhgn5y8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 712469037,
+          "mode": "list",
+          "cachedResultName": "Untitled",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rdtgU7Jq97YqVwtLU47daeVjP5hU1ZdCmUN9Uhgn5y8/edit#gid=712469037"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        0
+      ],
+      "id": "42e0f6b3-5dd5-4ea4-be1b-356e443663c6",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7bjK350Rx6kfYugB",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "60c440b9-e65c-44bf-b934-fe0127a11532",
+              "name": "Content",
+              "value": "=product name: {{ $json.Name }}\ncategory: {{ $json.Category }}\nSKU: {{ $json.SKU }}\nprice: ${{ $json.Price }}\ndescription: {{ $json.Description }}",
+              "type": "string"
+            },
+            {
+              "id": "0859f7b1-1bfc-48d7-a888-8e60e23cfb97",
+              "name": "Category",
+              "value": "={{ $json.Category }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        448,
+        0
+      ],
+      "id": "c60fed9b-91f2-4f2b-bc5a-021cacbdfb97",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "knowledgebase",
+          "mode": "list",
+          "cachedResultName": "knowledgebase",
+          "cachedResultUrl": ""
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        672,
+        0
+      ],
+      "id": "ea2b6471-2081-4569-865f-f914906300c6",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX4tni5uPRQp8WPn",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "embed-english-v3.0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        680,
+        232
+      ],
+      "id": "32b56810-e853-4082-8425-05d65a632492",
+      "name": "Embeddings Cohere",
+      "credentials": {
+        "cohereApi": {
+          "id": "Qcn98LIdQUAhGBpL",
+          "name": "Cohere account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $('Edit Fields').item.json.Content }}",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "=Category",
+                "value": "={{ $('Edit Fields').item.json.Category }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        808,
+        232
+      ],
+      "id": "2147b58c-1e1a-451d-a2e9-f1b8b7589582",
+      "name": "Default Data Loader"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

@@ -1,0 +1,190 @@
+{
+  "name": "n8n orchestrates - audio voice agent",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -16,
+        336
+      ],
+      "id": "61eda025-495c-4f24-8f72-56acf3da8db4",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "inclusionai/ling-3.0-flash-fin:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        56,
+        568
+      ],
+      "id": "52ea32f4-8b8d-42dc-95f6-8b79fd030ae8",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "2RnZm1pisvrnp7Lm",
+          "name": "OpenRouter account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "speech",
+        "voice": {
+          "__rl": true,
+          "value": "hpp4J3VqNfWAUOO0d1Us",
+          "mode": "list",
+          "cachedResultName": "Bella - Professional, Bright, Warm"
+        },
+        "text": "={{ $json.output }}",
+        "additionalOptions": {},
+        "requestOptions": {}
+      },
+      "type": "@elevenlabs/n8n-nodes-elevenlabs.elevenLabs",
+      "typeVersion": 1,
+      "position": [
+        336,
+        336
+      ],
+      "id": "97bd1aec-eb88-4a20-88f6-0a73fd916d1c",
+      "name": "Convert text to speech",
+      "credentials": {
+        "elevenLabsApi": {
+          "id": "S0Q6gp0T7rOIfGIC",
+          "name": "ElevenLabs account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "7e8ca4ff-0d2d-4dc7-9e85-396796a5487a",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -464,
+        336
+      ],
+      "id": "1786684b-7677-4a8e-b27e-2133dfa718cc",
+      "name": "Webhook",
+      "webhookId": "7e8ca4ff-0d2d-4dc7-9e85-396796a5487a"
+    },
+    {
+      "parameters": {
+        "respondWith": "binary",
+        "responseDataSource": "set",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        560,
+        336
+      ],
+      "id": "38b50d1f-3884-40b3-8610-9ef78442e386",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "resource": "speech",
+        "operation": "speechToText",
+        "file": "file",
+        "additionalOptions": {},
+        "requestOptions": {}
+      },
+      "type": "@elevenlabs/n8n-nodes-elevenlabs.elevenLabs",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        336
+      ],
+      "id": "6e701b69-3938-4969-b249-f38fc40d9dbc",
+      "name": "Transcribe audio or video",
+      "credentials": {
+        "elevenLabsApi": {
+          "id": "S0Q6gp0T7rOIfGIC",
+          "name": "ElevenLabs account 4"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Convert text to speech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert text to speech": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Transcribe audio or video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe audio or video": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
