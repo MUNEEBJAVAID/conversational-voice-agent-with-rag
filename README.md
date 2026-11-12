@@ -16,7 +16,11 @@ I built this system to bridge both worlds:
 
 ## System Architecture
 
-### Workflow Graph in n8n (Agentic RAG Engine)
+### 1. Data Ingestion Pipeline (Google Sheets ➔ Cohere ➔ Supabase Vector DB)
+
+![Data Ingestion Workflow Canvas](assets/data-ingest-canvas.png)
+
+### 2. Agentic Vector RAG Retrieval Engine (OpenRouter + Supabase + Webhook)
 
 ![Agentic RAG Workflow Canvas](assets/agentic-rag-canvas.png)
 
